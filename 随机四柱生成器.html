@@ -76,9 +76,18 @@ function colorize(p){ return `<span style="color:${color[wx[p[0]]]}">${p[0]}</sp
 
 const baseDate = new Date(2025,10,11);
 function getDayGZ(date){ const diff = Math.floor((date - baseDate)/86400000); return jiazi[(20 + diff + 60*1000)%60]; }
-function getYearGZ(y){ return jiazi[(y - 1984 + 60) % 60]; }
+
+// ---- 修改部分：以立春为换年标准 ----
+function getYearGZ(date){ 
+  const year = date.getFullYear();
+  const lichun = new Date(year, 1, 4); // 2月4日左右为立春
+  if(date < lichun) return jiazi[(year - 1 - 1984 + 60) % 60];
+  return jiazi[(year - 1984 + 60) % 60];
+}
+// ---- 以上是唯一修改 ----
+
 function getHourGZ(dayGZ,h){ const gan='甲乙丙丁戊己庚辛壬癸'; const dayIdx=gan.indexOf(dayGZ[0]); const ziIdx=Math.floor((h+1)/2)%12; return gan[(dayIdx*12+ziIdx)%10]+'子丑寅卯辰巳午未申酉戌亥'.charAt(ziIdx); }
-function getJiazi(){ let now = new Date(); if(now.getHours()>=23) now=new Date(now.getTime()+86400000); const y=now.getFullYear(); return {year:getYearGZ(y), month:month, day:getDayGZ(now), hour:getHourGZ(getDayGZ(now),now.getHours())}; }
+function getJiazi(){ let now = new Date(); if(now.getHours()>=23) now=new Date(now.getTime()+86400000); return {year:getYearGZ(now), month:month, day:getDayGZ(now), hour:getHourGZ(getDayGZ(now),now.getHours())}; }
 
 function generate(){
   const rand=[]; for(let i=0;i<4;i++) rand.push(jiazi[Math.random()*60|0]);
